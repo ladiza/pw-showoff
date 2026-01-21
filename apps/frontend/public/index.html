@@ -7,80 +7,207 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #f5f5f5; }
-    header { background: #2563eb; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-    .logo { font-size: 1.5rem; font-weight: bold; }
+
+    header { background: #2563eb; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .logo { font-size: 1.5rem; font-weight: bold; cursor: pointer; }
     .search-box { display: flex; gap: 0.5rem; }
     .search-box input { padding: 0.5rem 1rem; border: none; border-radius: 4px; width: 250px; }
     .search-box button { padding: 0.5rem 1rem; background: #1d4ed8; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .search-box button:hover { background: #1e40af; }
+
+    .filters { background: white; padding: 1rem 2rem; border-bottom: 1px solid #e5e7eb; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .filters label { font-size: 0.875rem; color: #666; }
+    .filter-btn { padding: 0.5rem 1rem; border: 1px solid #e5e7eb; background: white; border-radius: 4px; cursor: pointer; font-size: 0.875rem; }
+    .filter-btn:hover { background: #f9fafb; }
+    .filter-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+    .checkbox-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem; }
+
     main { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-    h1 { margin-bottom: 1rem; color: #333; }
-    .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
-    .product { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .product h3 { margin-bottom: 0.5rem; }
-    .product .price { color: #2563eb; font-size: 1.25rem; font-weight: bold; }
-    .product .category { color: #666; font-size: 0.875rem; margin-top: 0.5rem; }
-    .no-results { padding: 2rem; text-align: center; color: #666; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    h1 { color: #333; }
+    .product-count { color: #666; font-size: 0.875rem; }
+
+    .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+
+    .product-tile { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+    .product-tile:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,0.12); }
+    .product-tile__image { height: 160px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; }
+    .product-tile__content { padding: 1.25rem; }
+    .product-tile__header { display: flex; justify-content: space-between; align-items: start; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .product-tile__name { font-size: 1rem; font-weight: 600; color: #333; }
+    .product-tile__badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+    .product-tile__badge--in-stock { background: #dcfce7; color: #166534; }
+    .product-tile__badge--out-of-stock { background: #fee2e2; color: #991b1b; }
+    .product-tile__price { color: #2563eb; font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem; }
+    .product-tile__category { color: #666; font-size: 0.8rem; text-transform: capitalize; }
+    .product-tile__actions { margin-top: 1rem; display: flex; gap: 0.5rem; }
+    .btn { padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.875rem; cursor: pointer; border: none; }
+    .btn--primary { background: #2563eb; color: white; flex: 1; }
+    .btn--primary:hover { background: #1d4ed8; }
+    .btn--primary:disabled { background: #9ca3af; cursor: not-allowed; }
+    .btn--secondary { background: #f3f4f6; color: #374151; }
+    .btn--secondary:hover { background: #e5e7eb; }
+
+    .no-results { padding: 3rem; text-align: center; color: #666; background: white; border-radius: 12px; }
+
+    footer { text-align: center; padding: 2rem; color: #666; font-size: 0.875rem; margin-top: 2rem; }
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">Demo Shop</div>
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Hledat produkty...">
-      <button id="searchBtn">Hledat</button>
+  <header data-testid="header">
+    <div class="logo" data-testid="logo">Demo Shop</div>
+    <div class="search-box" data-testid="search-box">
+      <input type="text" data-testid="search-input" placeholder="Hledat produkty...">
+      <button data-testid="search-button">Hledat</button>
     </div>
   </header>
+
+  <div class="filters" data-testid="filters">
+    <label>Kategorie:</label>
+    <button class="filter-btn active" data-testid="filter-all" data-category="">Vše</button>
+    <button class="filter-btn" data-testid="filter-electronics" data-category="electronics">Elektronika</button>
+    <button class="filter-btn" data-testid="filter-accessories" data-category="accessories">Příslušenství</button>
+    <button class="filter-btn" data-testid="filter-clothing" data-category="clothing">Oblečení</button>
+    <label class="checkbox-label">
+      <input type="checkbox" data-testid="filter-in-stock">
+      Pouze skladem
+    </label>
+  </div>
+
   <main>
-    <h1 id="pageTitle">Produkty</h1>
-    <div id="products" class="products"></div>
+    <div class="page-header">
+      <h1 data-testid="page-title">Produkty</h1>
+      <span class="product-count" data-testid="product-count"></span>
+    </div>
+    <div data-testid="products-grid" class="products"></div>
   </main>
+
+  <footer data-testid="footer">
+    Demo Shop &copy; 2025 | Vytvořeno pro testovací účely
+  </footer>
+
   <script>
     const API_URL = window.location.hostname === 'localhost'
       ? 'http://localhost:3000'
       : 'http://backend:3000';
 
-    async function loadProducts(query = '') {
-      const endpoint = query
-        ? `${API_URL}/api/search?q=${encodeURIComponent(query)}`
-        : `${API_URL}/api/products`;
+    let currentCategory = '';
+    let currentQuery = '';
+    let onlyInStock = false;
+
+    async function loadProducts() {
+      let endpoint = `${API_URL}/api/products`;
+      const params = new URLSearchParams();
+
+      if (currentQuery) {
+        endpoint = `${API_URL}/api/search`;
+        params.set('q', currentQuery);
+      } else {
+        if (currentCategory) params.set('category', currentCategory);
+        if (onlyInStock) params.set('inStock', 'true');
+      }
+
+      const url = params.toString() ? `${endpoint}?${params}` : endpoint;
 
       try {
-        const res = await fetch(endpoint);
+        const res = await fetch(url);
         const data = await res.json();
-        const products = query ? data.results : data;
-        renderProducts(products, query);
+        const products = currentQuery ? data.results : data;
+        renderProducts(products);
       } catch (err) {
-        document.getElementById('products').innerHTML =
-          '<div class="no-results">Chyba při načítání produktů</div>';
+        document.querySelector('[data-testid="products-grid"]').innerHTML =
+          '<div class="no-results" data-testid="no-results">Chyba při načítání produktů</div>';
+        document.querySelector('[data-testid="product-count"]').textContent = '';
       }
     }
 
-    function renderProducts(products, query) {
-      const container = document.getElementById('products');
-      const title = document.getElementById('pageTitle');
+    function renderProducts(products) {
+      const container = document.querySelector('[data-testid="products-grid"]');
+      const title = document.querySelector('[data-testid="page-title"]');
+      const count = document.querySelector('[data-testid="product-count"]');
 
-      title.textContent = query ? `Výsledky pro "${query}"` : 'Produkty';
+      if (currentQuery) {
+        title.textContent = `Výsledky pro "${currentQuery}"`;
+      } else if (currentCategory) {
+        const categoryNames = { electronics: 'Elektronika', accessories: 'Příslušenství', clothing: 'Oblečení' };
+        title.textContent = categoryNames[currentCategory] || 'Produkty';
+      } else {
+        title.textContent = 'Produkty';
+      }
+
+      count.textContent = `${products.length} produktů`;
 
       if (products.length === 0) {
-        container.innerHTML = '<div class="no-results">Žádné produkty nenalezeny</div>';
+        container.innerHTML = '<div class="no-results" data-testid="no-results">Žádné produkty nenalezeny</div>';
         return;
       }
 
+      const icons = { electronics: '💻', accessories: '🎧', clothing: '👕' };
+
       container.innerHTML = products.map(p => `
-        <div class="product" data-id="${p.id}">
-          <h3>${p.name}</h3>
-          <div class="price">${p.price.toLocaleString('cs-CZ')} Kč</div>
-          <div class="category">${p.category}</div>
+        <div class="product-tile" data-testid="product-tile" data-product-id="${p.id}">
+          <div class="product-tile__image">${icons[p.category] || '📦'}</div>
+          <div class="product-tile__content">
+            <div class="product-tile__header">
+              <h3 class="product-tile__name" data-testid="product-name">${p.name}</h3>
+              <span class="product-tile__badge ${p.inStock ? 'product-tile__badge--in-stock' : 'product-tile__badge--out-of-stock'}" data-testid="product-stock">
+                ${p.inStock ? 'Skladem' : 'Vyprodáno'}
+              </span>
+            </div>
+            <div class="product-tile__price" data-testid="product-price">${p.price.toLocaleString('cs-CZ')} Kč</div>
+            <div class="product-tile__category" data-testid="product-category">${p.category}</div>
+            <div class="product-tile__actions">
+              <button class="btn btn--primary" data-testid="add-to-cart" ${!p.inStock ? 'disabled' : ''}>
+                ${p.inStock ? 'Přidat do košíku' : 'Nedostupné'}
+              </button>
+              <button class="btn btn--secondary" data-testid="product-detail">Detail</button>
+            </div>
+          </div>
         </div>
       `).join('');
     }
 
-    document.getElementById('searchBtn').addEventListener('click', () => {
-      loadProducts(document.getElementById('searchInput').value);
+    // Search
+    document.querySelector('[data-testid="search-button"]').addEventListener('click', () => {
+      currentQuery = document.querySelector('[data-testid="search-input"]').value;
+      loadProducts();
     });
 
-    document.getElementById('searchInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') loadProducts(e.target.value);
+    document.querySelector('[data-testid="search-input"]').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        currentQuery = e.target.value;
+        loadProducts();
+      }
+    });
+
+    // Category filters
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCategory = btn.dataset.category;
+        currentQuery = '';
+        document.querySelector('[data-testid="search-input"]').value = '';
+        loadProducts();
+      });
+    });
+
+    // In stock filter
+    document.querySelector('[data-testid="filter-in-stock"]').addEventListener('change', (e) => {
+      onlyInStock = e.target.checked;
+      loadProducts();
+    });
+
+    // Logo click - reset
+    document.querySelector('[data-testid="logo"]').addEventListener('click', () => {
+      currentCategory = '';
+      currentQuery = '';
+      onlyInStock = false;
+      document.querySelector('[data-testid="search-input"]').value = '';
+      document.querySelector('[data-testid="filter-in-stock"]').checked = false;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('[data-testid="filter-all"]').classList.add('active');
+      loadProducts();
     });
 
     loadProducts();
