@@ -1,0 +1,24 @@
+{
+  "name": "pw-showoff",
+  "version": "1.0.0",
+  "description": "Playwright test demo",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:api": "playwright test --project=api",
+    "test:e2e": "playwright test --project=ui",
+    "start:backend": "cd apps/backend && npm install && npm start",
+    "start:frontend": "npx serve apps/frontend/public -l 8080",
+    "report": "playwright show-report"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^25.0.9"
+  }
+}
