@@ -10,12 +10,28 @@ test.describe('Homepage Tests', () => {
     await expect(homePage.logo).toHaveText('Demo Shop');
   });
 
-  test('should display products on load', async ({ homePage, page }) => {
+  test('should display products on load', async ({ homePage }) => {
     await homePage.goto();
-    await waitForPageLoad(page);
+    await waitForPageLoad(homePage.page);
 
-    const products = page.locator('.product');
-    await expect(products.first()).toBeVisible();
-    expect(await products.count()).toBeGreaterThan(0);
+    const productsCount = await homePage.getProductsCount();
+    expect(productsCount).toBeGreaterThan(0);
+
+    const firstProduct = await homePage.getProduct(0);
+    await firstProduct.waitFor();
+    expect(await firstProduct.getName()).toBeTruthy();
+  });
+
+  test('should display correct product details', async ({ homePage }) => {
+    await homePage.goto();
+    await waitForPageLoad(homePage.page);
+
+    const products = await homePage.getProducts();
+    const laptop = products.find(async p => (await p.getName()).includes('Laptop'));
+
+    if (laptop) {
+      expect(await laptop.getCategory()).toBe('electronics');
+      expect(await laptop.getPriceAsNumber()).toBeGreaterThan(0);
+    }
   });
 });
