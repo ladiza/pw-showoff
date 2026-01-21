@@ -11,13 +11,16 @@
     "test:e2e": "playwright test --project=ui",
     "start:backend": "cd apps/backend && npm install && npm start",
     "start:frontend": "npx serve apps/frontend/public -l 8080",
-    "report": "playwright show-report"
+    "report": "playwright show-report",
+    "lint": "biome check .",
+    "format": "biome format --write ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@biomejs/biome": "2.3.11",
     "@playwright/test": "^1.57.0",
     "@types/node": "^25.0.9"
   }
