@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const baseURL = process.env.BASE_URL || 'http://localhost:8080';
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
@@ -8,7 +10,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [['html'], ['list'], ...(process.env.CI ? [['github'] as const] : [])],
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:8080',
+    baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
