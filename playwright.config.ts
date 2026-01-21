@@ -19,12 +19,12 @@ export default defineConfig({
           command: 'npm start',
           cwd: './apps/backend',
           port: 3000,
-          reuseExistingServer: !process.env.CI,
+          reuseExistingServer: true,
         },
         {
           command: 'npx serve ./apps/frontend/public -l 8080',
           port: 8080,
-          reuseExistingServer: !process.env.CI,
+          reuseExistingServer: true,
         },
       ],
   projects: [
