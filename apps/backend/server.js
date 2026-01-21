@@ -6,23 +6,46 @@ app.use(cors());
 app.use(express.json());
 
 const products = [
-  { id: 1, name: 'Laptop', price: 25000, category: 'electronics' },
-  { id: 2, name: 'Keyboard', price: 1500, category: 'electronics' },
-  { id: 3, name: 'Mouse', price: 800, category: 'electronics' },
-  { id: 4, name: 'Coffee Mug', price: 250, category: 'accessories' },
-  { id: 5, name: 'Desk Lamp', price: 900, category: 'accessories' },
+  { id: 1, name: 'MacBook Pro 14"', price: 52990, category: 'electronics', inStock: true },
+  { id: 2, name: 'iPhone 15 Pro', price: 33990, category: 'electronics', inStock: true },
+  { id: 3, name: 'AirPods Pro', price: 7490, category: 'electronics', inStock: false },
+  { id: 4, name: 'Magic Keyboard', price: 2990, category: 'electronics', inStock: true },
+  { id: 5, name: 'Magic Mouse', price: 2290, category: 'electronics', inStock: true },
+  { id: 6, name: 'Kožené pouzdro na iPhone', price: 1490, category: 'accessories', inStock: true },
+  { id: 7, name: 'Silikonový kryt MagSafe', price: 1290, category: 'accessories', inStock: true },
+  { id: 8, name: 'USB-C kabel 2m', price: 590, category: 'accessories', inStock: true },
+  { id: 9, name: 'Stojan na MacBook', price: 1890, category: 'accessories', inStock: false },
+  { id: 10, name: 'Čistící set na displej', price: 390, category: 'accessories', inStock: true },
+  { id: 11, name: 'Developer T-shirt', price: 690, category: 'clothing', inStock: true },
+  { id: 12, name: 'Mikina s kapucí "Code"', price: 1290, category: 'clothing', inStock: true },
+];
+
+const categories = [
+  { id: 'electronics', name: 'Elektronika' },
+  { id: 'accessories', name: 'Příslušenství' },
+  { id: 'clothing', name: 'Oblečení' },
 ];
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+app.get('/api/categories', (req, res) => {
+  res.json(categories);
+});
+
 app.get('/api/products', (req, res) => {
-  const { category } = req.query;
+  const { category, inStock } = req.query;
+  let filtered = products;
+
   if (category) {
-    return res.json(products.filter(p => p.category === category));
+    filtered = filtered.filter(p => p.category === category);
   }
-  res.json(products);
+  if (inStock === 'true') {
+    filtered = filtered.filter(p => p.inStock);
+  }
+
+  res.json(filtered);
 });
 
 app.get('/api/products/:id', (req, res) => {
