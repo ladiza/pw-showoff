@@ -9,6 +9,10 @@ export class HomePage {
   readonly pageTitle: Locator;
   readonly productsGrid: Locator;
   readonly noResults: Locator;
+  readonly priceRangeMin: Locator;
+  readonly priceRangeMax: Locator;
+  readonly priceMinValue: Locator;
+  readonly priceMaxValue: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -18,6 +22,10 @@ export class HomePage {
     this.pageTitle = page.getByTestId('page-title');
     this.productsGrid = page.getByTestId('products-grid');
     this.noResults = page.getByTestId('no-results');
+    this.priceRangeMin = page.getByTestId('price-range-min');
+    this.priceRangeMax = page.getByTestId('price-range-max');
+    this.priceMinValue = page.getByTestId('price-min-value');
+    this.priceMaxValue = page.getByTestId('price-max-value');
   }
 
   async goto() {
@@ -40,5 +48,29 @@ export class HomePage {
 
   async getProductsCount(): Promise<number> {
     return this.page.getByTestId('product-tile').count();
+  }
+
+  async setPriceRange(min: number, max: number) {
+    await this.priceRangeMin.fill(String(min));
+    await this.priceRangeMin.dispatchEvent('input');
+    await this.priceRangeMax.fill(String(max));
+    await this.priceRangeMax.dispatchEvent('input');
+  }
+
+  async setMinPrice(value: number) {
+    await this.priceRangeMin.fill(String(value));
+    await this.priceRangeMin.dispatchEvent('input');
+  }
+
+  async setMaxPrice(value: number) {
+    await this.priceRangeMax.fill(String(value));
+    await this.priceRangeMax.dispatchEvent('input');
+  }
+
+  async getDisplayedPriceRange(): Promise<{ min: string; max: string }> {
+    return {
+      min: await this.priceMinValue.textContent() ?? '',
+      max: await this.priceMaxValue.textContent() ?? '',
+    };
   }
 }

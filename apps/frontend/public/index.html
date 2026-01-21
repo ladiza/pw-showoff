@@ -15,12 +15,53 @@
     .search-box button { padding: 0.5rem 1rem; background: #1d4ed8; color: white; border: none; border-radius: 4px; cursor: pointer; }
     .search-box button:hover { background: #1e40af; }
 
-    .filters { background: white; padding: 1rem 2rem; border-bottom: 1px solid #e5e7eb; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .filters { background: white; padding: 1rem 2rem; border-bottom: 1px solid #e5e7eb; display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
     .filters label { font-size: 0.875rem; color: #666; }
     .filter-btn { padding: 0.5rem 1rem; border: 1px solid #e5e7eb; background: white; border-radius: 4px; cursor: pointer; font-size: 0.875rem; }
     .filter-btn:hover { background: #f9fafb; }
     .filter-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
     .checkbox-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem; }
+
+    /* Price Range Slider */
+    .price-filter { display: flex; align-items: center; gap: 0.75rem; }
+    .price-range-container { position: relative; width: 200px; height: 40px; }
+    .price-range-track { position: absolute; top: 50%; transform: translateY(-50%); width: 100%; height: 6px; background: #e5e7eb; border-radius: 3px; }
+    .price-range-selected { position: absolute; top: 50%; transform: translateY(-50%); height: 6px; background: #2563eb; border-radius: 3px; }
+    .price-range-container input[type="range"] {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      pointer-events: none;
+    }
+    .price-range-container input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #2563eb;
+      border: 3px solid white;
+      border-radius: 50%;
+      cursor: pointer;
+      pointer-events: auto;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .price-range-container input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #2563eb;
+      border: 3px solid white;
+      border-radius: 50%;
+      cursor: pointer;
+      pointer-events: auto;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .price-values { display: flex; gap: 0.5rem; align-items: center; font-size: 0.875rem; font-weight: 500; }
+    .price-values span { min-width: 70px; text-align: center; }
 
     main { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
@@ -68,6 +109,22 @@
     <button class="filter-btn" data-testid="filter-electronics" data-category="electronics">Elektronika</button>
     <button class="filter-btn" data-testid="filter-accessories" data-category="accessories">Příslušenství</button>
     <button class="filter-btn" data-testid="filter-clothing" data-category="clothing">Oblečení</button>
+
+    <div class="price-filter" data-testid="price-filter">
+      <label>Cena:</label>
+      <div class="price-values">
+        <span data-testid="price-min-value">0 Kč</span>
+        <span>–</span>
+        <span data-testid="price-max-value">100 000 Kč</span>
+      </div>
+      <div class="price-range-container" data-testid="price-range-container">
+        <div class="price-range-track"></div>
+        <div class="price-range-selected" data-testid="price-range-selected"></div>
+        <input type="range" data-testid="price-range-min" min="0" max="100000" value="0" step="100">
+        <input type="range" data-testid="price-range-max" min="0" max="100000" value="100000" step="100">
+      </div>
+    </div>
+
     <label class="checkbox-label">
       <input type="checkbox" data-testid="filter-in-stock">
       Pouze skladem
@@ -94,6 +151,9 @@
     let currentCategory = '';
     let currentQuery = '';
     let onlyInStock = false;
+    let priceMin = 0;
+    let priceMax = 100000;
+    let allProducts = [];
 
     async function loadProducts() {
       let endpoint = `${API_URL}/api/products`;
@@ -112,13 +172,18 @@
       try {
         const res = await fetch(url);
         const data = await res.json();
-        const products = currentQuery ? data.results : data;
-        renderProducts(products);
+        allProducts = currentQuery ? data.results : data;
+        filterAndRender();
       } catch (err) {
         document.querySelector('[data-testid="products-grid"]').innerHTML =
           '<div class="no-results" data-testid="no-results">Chyba při načítání produktů</div>';
         document.querySelector('[data-testid="product-count"]').textContent = '';
       }
+    }
+
+    function filterAndRender() {
+      const filtered = allProducts.filter(p => p.price >= priceMin && p.price <= priceMax);
+      renderProducts(filtered);
     }
 
     function renderProducts(products) {
@@ -167,6 +232,45 @@
       `).join('');
     }
 
+    // Price range slider
+    const rangeMin = document.querySelector('[data-testid="price-range-min"]');
+    const rangeMax = document.querySelector('[data-testid="price-range-max"]');
+    const rangeSelected = document.querySelector('[data-testid="price-range-selected"]');
+    const minValue = document.querySelector('[data-testid="price-min-value"]');
+    const maxValue = document.querySelector('[data-testid="price-max-value"]');
+
+    function updatePriceRange() {
+      const min = parseInt(rangeMin.value);
+      const max = parseInt(rangeMax.value);
+
+      if (min > max - 500) {
+        if (this === rangeMin) {
+          rangeMin.value = max - 500;
+        } else {
+          rangeMax.value = min + 500;
+        }
+      }
+
+      priceMin = parseInt(rangeMin.value);
+      priceMax = parseInt(rangeMax.value);
+
+      minValue.textContent = priceMin.toLocaleString('cs-CZ') + ' Kč';
+      maxValue.textContent = priceMax.toLocaleString('cs-CZ') + ' Kč';
+
+      const percentMin = (priceMin / 100000) * 100;
+      const percentMax = (priceMax / 100000) * 100;
+      rangeSelected.style.left = percentMin + '%';
+      rangeSelected.style.width = (percentMax - percentMin) + '%';
+
+      filterAndRender();
+    }
+
+    rangeMin.addEventListener('input', updatePriceRange);
+    rangeMax.addEventListener('input', updatePriceRange);
+
+    // Initialize range visual
+    updatePriceRange.call(rangeMin);
+
     // Search
     document.querySelector('[data-testid="search-button"]').addEventListener('click', () => {
       currentQuery = document.querySelector('[data-testid="search-input"]').value;
@@ -203,10 +307,15 @@
       currentCategory = '';
       currentQuery = '';
       onlyInStock = false;
+      priceMin = 0;
+      priceMax = 100000;
       document.querySelector('[data-testid="search-input"]').value = '';
       document.querySelector('[data-testid="filter-in-stock"]').checked = false;
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       document.querySelector('[data-testid="filter-all"]').classList.add('active');
+      rangeMin.value = 0;
+      rangeMax.value = 100000;
+      updatePriceRange.call(rangeMin);
       loadProducts();
     });
 

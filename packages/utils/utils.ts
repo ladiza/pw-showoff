@@ -19,3 +19,101 @@ export function formatPrice(price: number): string {
     currency: 'CZK',
   }).format(price);
 }
+
+// ============ API Mocking ============
+
+type MockApiOptions = {
+  status?: number;
+  body?: unknown;
+  contentType?: string;
+};
+
+export async function mockApiRoute(
+  page: Page,
+  urlPattern: string | RegExp,
+  options: MockApiOptions
+): Promise<void> {
+  const { status = 200, body = {}, contentType = 'application/json' } = options;
+
+  await page.route(urlPattern, async (route) => {
+    await route.fulfill({
+      status,
+      contentType,
+      body: typeof body === 'string' ? body : JSON.stringify(body),
+    });
+  });
+}
+
+export async function mockEmptyProducts(page: Page): Promise<void> {
+  await mockApiRoute(page, '**/api/products', { body: [] });
+  await mockApiRoute(page, '**/api/search*', { body: { query: '', count: 0, results: [] } });
+}
+
+export async function mockApiError(page: Page, urlPattern: string | RegExp, statusCode = 500): Promise<void> {
+  await mockApiRoute(page, urlPattern, {
+    status: statusCode,
+    body: { error: 'Internal Server Error' },
+  });
+}
+
+export async function mockNetworkFailure(page: Page, urlPattern: string | RegExp): Promise<void> {
+  await page.route(urlPattern, (route) => route.abort('failed'));
+}
+
+// ============ Product Mocking ============
+
+export type MockProduct = {
+  id: number;
+  name: string;
+  price: number;
+  category: string;
+  inStock: boolean;
+};
+
+export function createMockProduct(overrides: Partial<MockProduct> = {}): MockProduct {
+  return {
+    id: 1,
+    name: 'Test Product',
+    price: 1000,
+    category: 'electronics',
+    inStock: true,
+    ...overrides,
+  };
+}
+
+export function createMockProducts(count: number, overrides: Partial<MockProduct> = {}): MockProduct[] {
+  return Array.from({ length: count }, (_, i) =>
+    createMockProduct({ id: i + 1, name: `Product ${i + 1}`, ...overrides })
+  );
+}
+
+export const mockProductPresets = {
+  outOfStock: createMockProduct({ name: 'Out of Stock Item', inStock: false }),
+  expensive: createMockProduct({ name: 'Luxury Item', price: 99999 }),
+  cheap: createMockProduct({ name: 'Budget Item', price: 99 }),
+  electronics: createMockProduct({ name: 'Gadget', category: 'electronics' }),
+  clothing: createMockProduct({ name: 'T-Shirt', category: 'clothing' }),
+  accessories: createMockProduct({ name: 'Phone Case', category: 'accessories' }),
+};
+
+export async function mockProducts(page: Page, products: MockProduct[]): Promise<void> {
+  await mockApiRoute(page, '**/api/products', { body: products });
+}
+
+export async function mockSingleProduct(page: Page, product: Partial<MockProduct> = {}): Promise<void> {
+  await mockProducts(page, [createMockProduct(product)]);
+}
+
+export async function mockOutOfStockProducts(page: Page, count = 3): Promise<void> {
+  const products = createMockProducts(count, { inStock: false });
+  await mockProducts(page, products);
+}
+
+export async function mockMixedStockProducts(page: Page): Promise<void> {
+  const products = [
+    createMockProduct({ id: 1, name: 'In Stock Item', inStock: true }),
+    createMockProduct({ id: 2, name: 'Out of Stock Item', inStock: false }),
+    createMockProduct({ id: 3, name: 'Another Available', inStock: true }),
+  ];
+  await mockProducts(page, products);
+}
