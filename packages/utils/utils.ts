@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 export async function waitForPageLoad(page: Page): Promise<void> {
   await page.waitForLoadState('domcontentloaded');
@@ -10,7 +10,9 @@ export function generateRandomEmail(): string {
 }
 
 export function generateRandomString(length: number = 8): string {
-  return Math.random().toString(36).substring(2, 2 + length);
+  return Math.random()
+    .toString(36)
+    .substring(2, 2 + length);
 }
 
 export function formatPrice(price: number): string {
@@ -31,7 +33,7 @@ type MockApiOptions = {
 export async function mockApiRoute(
   page: Page,
   urlPattern: string | RegExp,
-  options: MockApiOptions
+  options: MockApiOptions,
 ): Promise<void> {
   const { status = 200, body = {}, contentType = 'application/json' } = options;
 
@@ -49,7 +51,11 @@ export async function mockEmptyProducts(page: Page): Promise<void> {
   await mockApiRoute(page, '**/api/search*', { body: { query: '', count: 0, results: [] } });
 }
 
-export async function mockApiError(page: Page, urlPattern: string | RegExp, statusCode = 500): Promise<void> {
+export async function mockApiError(
+  page: Page,
+  urlPattern: string | RegExp,
+  statusCode = 500,
+): Promise<void> {
   await mockApiRoute(page, urlPattern, {
     status: statusCode,
     body: { error: 'Internal Server Error' },
@@ -81,9 +87,12 @@ export function createMockProduct(overrides: Partial<MockProduct> = {}): MockPro
   };
 }
 
-export function createMockProducts(count: number, overrides: Partial<MockProduct> = {}): MockProduct[] {
+export function createMockProducts(
+  count: number,
+  overrides: Partial<MockProduct> = {},
+): MockProduct[] {
   return Array.from({ length: count }, (_, i) =>
-    createMockProduct({ id: i + 1, name: `Product ${i + 1}`, ...overrides })
+    createMockProduct({ id: i + 1, name: `Product ${i + 1}`, ...overrides }),
   );
 }
 
@@ -100,7 +109,10 @@ export async function mockProducts(page: Page, products: MockProduct[]): Promise
   await mockApiRoute(page, '**/api/products', { body: products });
 }
 
-export async function mockSingleProduct(page: Page, product: Partial<MockProduct> = {}): Promise<void> {
+export async function mockSingleProduct(
+  page: Page,
+  product: Partial<MockProduct> = {},
+): Promise<void> {
   await mockProducts(page, [createMockProduct(product)]);
 }
 

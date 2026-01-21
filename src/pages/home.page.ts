@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { ProductTile } from '../components';
 
 export class HomePage {
@@ -39,7 +39,7 @@ export class HomePage {
 
   async getProducts(): Promise<ProductTile[]> {
     const tiles = await this.page.getByTestId('product-tile').all();
-    return tiles.map(tile => new ProductTile(tile));
+    return tiles.map((tile) => new ProductTile(tile));
   }
 
   async getProduct(index: number): Promise<ProductTile> {
@@ -69,8 +69,8 @@ export class HomePage {
 
   async getDisplayedPriceRange(): Promise<{ min: string; max: string }> {
     return {
-      min: await this.priceMinValue.textContent() ?? '',
-      max: await this.priceMaxValue.textContent() ?? '',
+      min: (await this.priceMinValue.textContent()) ?? '',
+      max: (await this.priceMaxValue.textContent()) ?? '',
     };
   }
 }

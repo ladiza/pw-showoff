@@ -1,5 +1,5 @@
-import { test, expect } from '../../src/fixtures/test.fixture';
-import { waitForPageLoad, generateRandomString } from '@utils';
+import { generateRandomString, waitForPageLoad } from '@utils';
+import { expect, test } from '../../src/fixtures/test.fixture';
 
 test.describe('Search Tests', () => {
   test('should search and display matching results', async ({ homePage }) => {

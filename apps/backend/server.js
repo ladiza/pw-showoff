@@ -26,11 +26,11 @@ const categories = [
   { id: 'clothing', name: 'Oblečení' },
 ];
 
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.get('/api/categories', (req, res) => {
+app.get('/api/categories', (_req, res) => {
   res.json(categories);
 });
 
@@ -39,17 +39,17 @@ app.get('/api/products', (req, res) => {
   let filtered = products;
 
   if (category) {
-    filtered = filtered.filter(p => p.category === category);
+    filtered = filtered.filter((p) => p.category === category);
   }
   if (inStock === 'true') {
-    filtered = filtered.filter(p => p.inStock);
+    filtered = filtered.filter((p) => p.inStock);
   }
 
   res.json(filtered);
 });
 
 app.get('/api/products/:id', (req, res) => {
-  const product = products.find(p => p.id === parseInt(req.params.id));
+  const product = products.find((p) => p.id === parseInt(req.params.id, 10));
   if (!product) {
     return res.status(404).json({ error: 'Product not found' });
   }
@@ -61,9 +61,7 @@ app.get('/api/search', (req, res) => {
   if (!q) {
     return res.status(400).json({ error: 'Query parameter "q" is required' });
   }
-  const results = products.filter(p =>
-    p.name.toLowerCase().includes(q.toLowerCase())
-  );
+  const results = products.filter((p) => p.name.toLowerCase().includes(q.toLowerCase()));
   res.json({ query: q, count: results.length, results });
 });
 

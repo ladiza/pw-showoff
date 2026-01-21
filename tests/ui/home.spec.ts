@@ -1,13 +1,13 @@
-import { test, expect } from '../../src/fixtures/test.fixture';
 import {
-  waitForPageLoad,
-  mockEmptyProducts,
-  mockNetworkFailure,
-  mockProducts,
-  mockOutOfStockProducts,
-  mockMixedStockProducts,
   createMockProduct,
+  mockEmptyProducts,
+  mockMixedStockProducts,
+  mockNetworkFailure,
+  mockOutOfStockProducts,
+  mockProducts,
+  waitForPageLoad,
 } from '@utils';
+import { expect, test } from '../../src/fixtures/test.fixture';
 
 test.describe('Homepage Tests', () => {
   test('should load homepage and display logo', async ({ homePage }) => {
@@ -35,7 +35,7 @@ test.describe('Homepage Tests', () => {
     await waitForPageLoad(homePage.page);
 
     const products = await homePage.getProducts();
-    const laptop = products.find(async p => (await p.getName()).includes('Laptop'));
+    const laptop = products.find(async (p) => (await p.getName()).includes('Laptop'));
 
     if (laptop) {
       expect(await laptop.getCategory()).toBe('electronics');

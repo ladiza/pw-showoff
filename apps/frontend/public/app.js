@@ -1,6 +1,5 @@
-const API_URL = window.location.hostname === 'localhost'
-  ? 'http://localhost:3000'
-  : 'http://backend:3000';
+const API_URL =
+  window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'http://backend:3000';
 
 let currentCategory = '';
 let currentQuery = '';
@@ -28,7 +27,7 @@ async function loadProducts() {
     const data = await res.json();
     allProducts = currentQuery ? data.results : data;
     filterAndRender();
-  } catch (err) {
+  } catch (_err) {
     document.querySelector('[data-testid="products-grid"]').innerHTML =
       '<div class="no-results" data-testid="no-results">Chyba při načítání produktů</div>';
     document.querySelector('[data-testid="product-count"]').textContent = '';
@@ -36,7 +35,7 @@ async function loadProducts() {
 }
 
 function filterAndRender() {
-  const filtered = allProducts.filter(p => p.price >= priceMin && p.price <= priceMax);
+  const filtered = allProducts.filter((p) => p.price >= priceMin && p.price <= priceMax);
   renderProducts(filtered);
 }
 
@@ -48,7 +47,11 @@ function renderProducts(products) {
   if (currentQuery) {
     title.textContent = `Výsledky pro "${currentQuery}"`;
   } else if (currentCategory) {
-    const categoryNames = { electronics: 'Elektronika', accessories: 'Příslušenství', clothing: 'Oblečení' };
+    const categoryNames = {
+      electronics: 'Elektronika',
+      accessories: 'Příslušenství',
+      clothing: 'Oblečení',
+    };
     title.textContent = categoryNames[currentCategory] || 'Produkty';
   } else {
     title.textContent = 'Produkty';
@@ -57,13 +60,16 @@ function renderProducts(products) {
   count.textContent = `${products.length} produktů`;
 
   if (products.length === 0) {
-    container.innerHTML = '<div class="no-results" data-testid="no-results">Žádné produkty nenalezeny</div>';
+    container.innerHTML =
+      '<div class="no-results" data-testid="no-results">Žádné produkty nenalezeny</div>';
     return;
   }
 
   const icons = { electronics: '💻', accessories: '🎧', clothing: '👕' };
 
-  container.innerHTML = products.map(p => `
+  container.innerHTML = products
+    .map(
+      (p) => `
     <div class="product-tile" data-testid="product-tile" data-product-id="${p.id}">
       <div class="product-tile__image">${icons[p.category] || '📦'}</div>
       <div class="product-tile__content">
@@ -83,7 +89,9 @@ function renderProducts(products) {
         </div>
       </div>
     </div>
-  `).join('');
+  `,
+    )
+    .join('');
 }
 
 // Price range slider
@@ -94,8 +102,8 @@ const minValue = document.querySelector('[data-testid="price-min-value"]');
 const maxValue = document.querySelector('[data-testid="price-max-value"]');
 
 function updatePriceRange() {
-  const min = parseInt(rangeMin.value);
-  const max = parseInt(rangeMax.value);
+  const min = parseInt(rangeMin.value, 10);
+  const max = parseInt(rangeMax.value, 10);
 
   if (min > max - 500) {
     if (this === rangeMin) {
@@ -105,16 +113,16 @@ function updatePriceRange() {
     }
   }
 
-  priceMin = parseInt(rangeMin.value);
-  priceMax = parseInt(rangeMax.value);
+  priceMin = parseInt(rangeMin.value, 10);
+  priceMax = parseInt(rangeMax.value, 10);
 
-  minValue.textContent = priceMin.toLocaleString('cs-CZ') + ' Kč';
-  maxValue.textContent = priceMax.toLocaleString('cs-CZ') + ' Kč';
+  minValue.textContent = `${priceMin.toLocaleString('cs-CZ')} Kč`;
+  maxValue.textContent = `${priceMax.toLocaleString('cs-CZ')} Kč`;
 
   const percentMin = (priceMin / 100000) * 100;
   const percentMax = (priceMax / 100000) * 100;
-  rangeSelected.style.left = percentMin + '%';
-  rangeSelected.style.width = (percentMax - percentMin) + '%';
+  rangeSelected.style.left = `${percentMin}%`;
+  rangeSelected.style.width = `${percentMax - percentMin}%`;
 
   filterAndRender();
 }
@@ -124,7 +132,7 @@ rangeMax.addEventListener('input', updatePriceRange);
 
 // Initialize range visual
 if (rangeMin) {
-    updatePriceRange.call(rangeMin);
+  updatePriceRange.call(rangeMin);
 }
 
 // Search
@@ -141,9 +149,11 @@ document.querySelector('[data-testid="search-input"]').addEventListener('keypres
 });
 
 // Category filters
-document.querySelectorAll('.filter-btn').forEach(btn => {
+document.querySelectorAll('.filter-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.filter-btn').forEach((b) => {
+      b.classList.remove('active');
+    });
     btn.classList.add('active');
     currentCategory = btn.dataset.category;
     currentQuery = '';
@@ -167,7 +177,9 @@ document.querySelector('[data-testid="logo"]').addEventListener('click', () => {
   priceMax = 100000;
   document.querySelector('[data-testid="search-input"]').value = '';
   document.querySelector('[data-testid="filter-in-stock"]').checked = false;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.filter-btn').forEach((b) => {
+    b.classList.remove('active');
+  });
   document.querySelector('[data-testid="filter-all"]').classList.add('active');
   rangeMin.value = 0;
   rangeMax.value = 100000;
