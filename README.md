@@ -23,8 +23,11 @@ This vibecoded repository demonstrates automated testing using Playwright for a 
 
 - Node.js (v18 or higher)
 - npm
+- Docker and Docker Compose (optional, for containerized execution)
 
 ## Getting Started
+
+### Local Setup
 
 1. Install dependencies:
    ```bash
@@ -45,6 +48,41 @@ This vibecoded repository demonstrates automated testing using Playwright for a 
    # Open Playwright UI mode
    npm run test:ui
    ```
+
+### Docker Setup
+
+The project includes a Docker Compose setup that automatically handles starting the backend and frontend, performs health checks, and runs tests in a clean environment.
+
+1. **Run all tests in Docker:**
+   ```bash
+   # Build images and run the entire suite
+   docker compose run --rm e2e npx playwright test
+   ```
+
+2. **Start application services and run tests:**
+   ```bash
+   # Start the backend and frontend services
+   docker compose up -d backend frontend
+
+   # Run tests against the containerized services
+   npm test
+
+   # Stop the services after testing
+   docker compose down
+   ```
+
+3. **View reports:**
+   Test reports are automatically written back to your local `playwright-report/` directory thanks to volume mounting. You can view them on your host using:
+   ```bash
+   npx playwright show-report
+   ```
+
+4. **Stop services:**
+   ```bash
+   docker compose down
+   ```
+
+> **Note on Permissions:** If you encounter `Permission denied` errors when running docker commands, try prefixing them with `sudo` or add your user to the `docker` group.
 
 ## Development
 

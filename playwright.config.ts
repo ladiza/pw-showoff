@@ -8,23 +8,25 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [['html'], ['list'], ...(process.env.CI ? [['github'] as const] : [])],
   use: {
-    baseURL: 'http://localhost:8080',
+    baseURL: process.env.BASE_URL || 'http://localhost:8080',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
-  webServer: [
-    {
-      command: 'npm start',
-      cwd: './apps/backend',
-      port: 3000,
-      reuseExistingServer: !process.env.CI,
-    },
-    {
-      command: 'npx serve ./apps/frontend/public -l 8080',
-      port: 8080,
-      reuseExistingServer: !process.env.CI,
-    },
-  ],
+  webServer: process.env.DOCKER_RUN
+    ? undefined
+    : [
+        {
+          command: 'npm start',
+          cwd: './apps/backend',
+          port: 3000,
+          reuseExistingServer: !process.env.CI,
+        },
+        {
+          command: 'npx serve ./apps/frontend/public -l 8080',
+          port: 8080,
+          reuseExistingServer: !process.env.CI,
+        },
+      ],
   projects: [
     {
       name: 'ui',

@@ -27,8 +27,14 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
 
+      - name: Start Docker services
+        run: docker compose up -d backend frontend
+
       - name: Run tests
         run: npm test
+
+      - name: Stop Docker services
+        run: docker compose down
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
