@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo Shop</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; }
+    header { background: #2563eb; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 1.5rem; font-weight: bold; }
+    .search-box { display: flex; gap: 0.5rem; }
+    .search-box input { padding: 0.5rem 1rem; border: none; border-radius: 4px; width: 250px; }
+    .search-box button { padding: 0.5rem 1rem; background: #1d4ed8; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    main { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { margin-bottom: 1rem; color: #333; }
+    .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+    .product { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .product h3 { margin-bottom: 0.5rem; }
+    .product .price { color: #2563eb; font-size: 1.25rem; font-weight: bold; }
+    .product .category { color: #666; font-size: 0.875rem; margin-top: 0.5rem; }
+    .no-results { padding: 2rem; text-align: center; color: #666; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Demo Shop</div>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Hledat produkty...">
+      <button id="searchBtn">Hledat</button>
+    </div>
+  </header>
+  <main>
+    <h1 id="pageTitle">Produkty</h1>
+    <div id="products" class="products"></div>
+  </main>
+  <script>
+    const API_URL = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000'
+      : 'http://backend:3000';
+
+    async function loadProducts(query = '') {
+      const endpoint = query
+        ? `${API_URL}/api/search?q=${encodeURIComponent(query)}`
+        : `${API_URL}/api/products`;
+
+      try {
+        const res = await fetch(endpoint);
+        const data = await res.json();
+        const products = query ? data.results : data;
+        renderProducts(products, query);
+      } catch (err) {
+        document.getElementById('products').innerHTML =
+          '<div class="no-results">Chyba při načítání produktů</div>';
+      }
+    }
+
+    function renderProducts(products, query) {
+      const container = document.getElementById('products');
+      const title = document.getElementById('pageTitle');
+
+      title.textContent = query ? `Výsledky pro "${query}"` : 'Produkty';
+
+      if (products.length === 0) {
+        container.innerHTML = '<div class="no-results">Žádné produkty nenalezeny</div>';
+        return;
+      }
+
+      container.innerHTML = products.map(p => `
+        <div class="product" data-id="${p.id}">
+          <h3>${p.name}</h3>
+          <div class="price">${p.price.toLocaleString('cs-CZ')} Kč</div>
+          <div class="category">${p.category}</div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('searchBtn').addEventListener('click', () => {
+      loadProducts(document.getElementById('searchInput').value);
+    });
+
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') loadProducts(e.target.value);
+    });
+
+    loadProducts();
+  </script>
+</body>
+</html>
