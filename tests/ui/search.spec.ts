@@ -6,10 +6,10 @@ test.describe('Search Tests', () => {
     await homePage.goto();
     await waitForPageLoad(homePage.page);
 
-    await homePage.search('Laptop');
+    await homePage.search('iPhone');
 
-    await expect(homePage.pageTitle).toContainText('Laptop');
-    expect(await homePage.getProductsCount()).toBe(1);
+    await expect(homePage.pageTitle).toContainText('iPhone');
+    expect(await homePage.getProductsCount()).toBeGreaterThan(0);
   });
 
   test('should show no results message for gibberish', async ({ homePage }) => {

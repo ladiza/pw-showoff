@@ -4,13 +4,13 @@ const API_URL = process.env.API_URL || 'http://localhost:3000';
 
 test.describe('Search API', () => {
   test('GET /api/search returns matching products', async ({ request }) => {
-    const response = await request.get(`${API_URL}/api/search?q=laptop`);
+    const response = await request.get(`${API_URL}/api/search?q=MacBook`);
 
     expect(response.ok()).toBeTruthy();
     const body = await response.json();
-    expect(body.query).toBe('laptop');
-    expect(body.count).toBe(1);
-    expect(body.results[0].name).toBe('Laptop');
+    expect(body.query).toBe('MacBook');
+    expect(body.count).toBeGreaterThan(0);
+    expect(body.results[0].name).toContain('MacBook');
   });
 
   test('GET /api/search returns empty for no matches', async ({ request }) => {

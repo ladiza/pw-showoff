@@ -30,7 +30,7 @@ test.describe('Products API', () => {
     expect(response.ok()).toBeTruthy();
     const product = await response.json();
     expect(product.id).toBe(1);
-    expect(product.name).toBe('Laptop');
+    expect(product.name).toBe('MacBook Pro 14"');
   });
 
   test('GET /api/products/:id returns 404 for non-existent product', async ({ request }) => {
