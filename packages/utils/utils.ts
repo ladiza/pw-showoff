@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { APIResponse, Page, Request } from '@playwright/test';
 
 export async function waitForPageLoad(page: Page): Promise<void> {
   await page.waitForLoadState('domcontentloaded');
@@ -128,4 +128,42 @@ export async function mockMixedStockProducts(page: Page): Promise<void> {
     createMockProduct({ id: 3, name: 'Another Available', inStock: true }),
   ];
   await mockProducts(page, products);
+}
+
+// ============ Advanced API Interception ============
+
+/**
+ * Sets up a route to intercept and modify API requests before they are sent.
+ */
+export async function modifyAPIRequest(
+  page: Page,
+  apiMatcher: string | RegExp,
+  modifyApiRequest: (request: Request) => {
+    url?: string;
+    method?: string;
+    headers?: { [key: string]: string };
+    postData?: string | Buffer;
+  },
+) {
+  await page.route(apiMatcher, async (route) => {
+    const originalRequest: Request = route.request();
+    const modifiedData = modifyApiRequest(originalRequest);
+    await route.continue(modifiedData);
+  });
+}
+
+/**
+ * Sets up a route to intercept and modify API responses after they are received from the server.
+ * The callback should return an object compatible with route.fulfill (e.g., { json: data } or { body: data }).
+ */
+export async function modifyAPIResponse(
+  page: Page,
+  apiMatcher: string | RegExp,
+  modifyApiResponse: (response: APIResponse) => Promise<any>,
+) {
+  await page.route(apiMatcher, async (route) => {
+    const response = await route.fetch();
+    const modifiedData = await modifyApiResponse(response);
+    await route.fulfill(modifiedData);
+  });
 }

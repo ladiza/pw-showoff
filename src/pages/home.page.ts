@@ -1,8 +1,9 @@
 import type { Locator, Page } from '@playwright/test';
-import { ProductTile } from '../components';
+import { CategoryFilter, ProductTile } from '../components';
 
 export class HomePage {
   readonly page: Page;
+  readonly categoryFilter: CategoryFilter;
   readonly searchInput: Locator;
   readonly searchButton: Locator;
   readonly logo: Locator;
@@ -16,6 +17,7 @@ export class HomePage {
 
   constructor(page: Page) {
     this.page = page;
+    this.categoryFilter = new CategoryFilter(page.getByTestId('filters'));
     this.searchInput = page.getByTestId('search-input');
     this.searchButton = page.getByTestId('search-button');
     this.logo = page.getByTestId('logo');

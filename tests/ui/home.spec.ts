@@ -1,10 +1,12 @@
 import {
   createMockProduct,
+  mockApiRoute,
   mockEmptyProducts,
   mockMixedStockProducts,
   mockNetworkFailure,
   mockOutOfStockProducts,
   mockProducts,
+  modifyAPIResponse,
   waitForPageLoad,
 } from '@utils';
 import { expect, test } from '../../src/fixtures/test.fixture';
@@ -236,5 +238,114 @@ test.describe('Price Range Filter', () => {
     expect(await homePage.getProductsCount()).toBe(1);
     const visibleProduct = await homePage.getProduct(0);
     expect(await visibleProduct.getName()).toBe('Rolex');
+  });
+});
+
+test.describe('Category Filters', () => {
+  const mixedProducts = [
+    createMockProduct({ id: 1, name: 'Laptop Pro', category: 'electronics' }),
+    createMockProduct({ id: 2, name: 'Cool Shirt', category: 'clothing' }),
+    createMockProduct({ id: 3, name: 'Gaming Mouse', category: 'electronics' }),
+    createMockProduct({ id: 4, name: 'Denim Jacket', category: 'clothing' }),
+  ];
+
+  test('should filter by Electronics category', async ({ homePage, page }) => {
+    // Initial load shows all products
+    await mockProducts(page, mixedProducts);
+    await homePage.goto();
+    await waitForPageLoad(page);
+    expect(await homePage.getProductsCount()).toBe(4);
+
+    // Mock filtered response for electronics
+    const electronics = mixedProducts.filter((p) => p.category === 'electronics');
+    await mockApiRoute(page, /.*\/api\/products\?category=electronics/, { body: electronics });
+
+    // Select category and wait for response
+    const responsePromise = page.waitForResponse(/.*\/api\/products\?category=electronics/);
+    await homePage.categoryFilter.selectCategory('Elektronika');
+    await responsePromise;
+
+    // Verify only electronics are shown
+    expect(await homePage.getProductsCount()).toBe(2);
+    const visibleProducts = await homePage.getProducts();
+    for (const product of visibleProducts) {
+      expect(await product.getCategory()).toBe('electronics');
+    }
+    expect(homePage.pageTitle).toHaveText('Elektronika');
+  });
+
+  test('should filter by Clothing category', async ({ homePage, page }) => {
+    await mockProducts(page, mixedProducts);
+    await homePage.goto();
+    await waitForPageLoad(page);
+
+    // Mock filtered response for clothing
+    const clothing = mixedProducts.filter((p) => p.category === 'clothing');
+    await mockApiRoute(page, /.*\/api\/products\?category=clothing/, { body: clothing });
+
+    // Select category and wait for response
+    const responsePromise = page.waitForResponse(/.*\/api\/products\?category=clothing/);
+    await homePage.categoryFilter.selectCategory('Oblečení');
+    await responsePromise;
+
+    expect(await homePage.getProductsCount()).toBe(2);
+    expect(await (await homePage.getProduct(0)).getCategory()).toBe('clothing');
+    expect(homePage.pageTitle).toHaveText('Oblečení');
+  });
+
+  test('should show all products when "Vše" is selected', async ({ homePage, page }) => {
+    // Start with a filtered view
+    const electronics = mixedProducts.filter((p) => p.category === 'electronics');
+    await mockApiRoute(page, /.*\/api\/products\?category=electronics/, { body: electronics });
+
+    await homePage.goto();
+    await waitForPageLoad(page);
+    
+    const electronicsResponse = page.waitForResponse(/.*\/api\/products\?category=electronics/);
+    await homePage.categoryFilter.selectCategory('Elektronika');
+    await electronicsResponse;
+    expect(await homePage.getProductsCount()).toBe(2);
+
+    // Mock reset to all products (no category param)
+    await mockProducts(page, mixedProducts);
+
+    // Select "All" and wait for response
+    const allResponse = page.waitForResponse(/.*\/api\/products($|\?)/);
+    await homePage.categoryFilter.selectCategory('Vše');
+    await allResponse;
+
+    expect(await homePage.getProductsCount()).toBe(4);
+    expect(homePage.pageTitle).toHaveText('Produkty');
+  });
+});
+
+test.describe('Advanced Interception', () => {
+  test('should inject a "Flash Sale" product using modifyAPIResponse', async ({ homePage, page }) => {
+    // We use modifyAPIResponse to intercept the REAL backend response
+    // and append a special test product.
+    await modifyAPIResponse(page, '**/api/products', async (response) => {
+      const products = await response.json();
+      const flashSaleItem = createMockProduct({
+        id: 999,
+        name: '⚡ FLASH SALE: Gaming PC',
+        price: 1,
+        category: 'electronics',
+      });
+
+      // Return modified fulfill options
+      return {
+        json: [...products, flashSaleItem],
+      };
+    });
+
+    await homePage.goto();
+    await waitForPageLoad(page);
+
+    // Verify the injected product is present alongside real products
+    const flashSaleTile = homePage.page.getByText('⚡ FLASH SALE');
+    await expect(flashSaleTile).toBeVisible();
+
+    const count = await homePage.getProductsCount();
+    expect(count).toBeGreaterThan(1); // Real products + our injected one
   });
 });
