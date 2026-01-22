@@ -64,6 +64,9 @@ The project includes a Docker Compose setup that automatically handles starting 
    # Start the backend and frontend services
    docker compose up -d backend frontend
 
+   # or rebuild the services after a change
+   docker compose up --build -d backend frontend
+
    # Run tests against the containerized services
    npm test
 

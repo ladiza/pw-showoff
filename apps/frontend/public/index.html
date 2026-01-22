@@ -51,6 +51,18 @@
     <div data-testid="products-grid" class="products"></div>
   </main>
 
+  <section class="debug-zone" data-testid="debug-zone">
+    <h2>SmartLocator Demo</h2>
+    <p>This button is covered by a transparent overlay. Standard <code>.click()</code> will fail, but <code>.executeClick()</code> will succeed.</p>
+    <div class="overlay-container">
+      <button id="obscured-button" data-testid="obscured-button" class="btn btn--primary">Click Me</button>
+      <div id="overlay" data-testid="overlay">I am an overlay</div>
+    </div>
+    <div class="debug-status">
+      Status: <span id="click-result" data-testid="click-result">Waiting...</span>
+    </div>
+  </section>
+
   <footer data-testid="footer">
     Demo Shop &copy; 2025 | Vytvořeno pro testovací účely
   </footer>

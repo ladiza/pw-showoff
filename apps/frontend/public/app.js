@@ -141,6 +141,23 @@ document.querySelector('[data-testid="search-button"]').addEventListener('click'
   loadProducts();
 });
 
+// Debug Zone Handlers
+const obscuredButton = document.getElementById('obscured-button');
+const overlay = document.getElementById('overlay');
+const clickResult = document.getElementById('click-result');
+
+if (obscuredButton && overlay && clickResult) {
+  obscuredButton.addEventListener('click', () => {
+    clickResult.textContent = 'Clicked!';
+    clickResult.style.color = '#166534'; // Green
+  });
+
+  overlay.addEventListener('click', () => {
+    clickResult.textContent = 'Overlay intercepted click!';
+    clickResult.style.color = '#991b1b'; // Red
+  });
+}
+
 document.querySelector('[data-testid="search-input"]').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     currentQuery = e.target.value;
