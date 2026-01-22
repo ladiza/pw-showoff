@@ -1,30 +1,20 @@
 import type { Locator } from '@playwright/test';
 
 export class ProductTile {
-  constructor(private root: Locator) {}
+  readonly name: Locator;
+  readonly price: Locator;
+  readonly category: Locator;
+  readonly stockBadge: Locator;
+  readonly addToCartButton: Locator;
+  readonly detailButton: Locator;
 
-  get name(): Locator {
-    return this.root.getByTestId('product-name');
-  }
-
-  get price(): Locator {
-    return this.root.getByTestId('product-price');
-  }
-
-  get category(): Locator {
-    return this.root.getByTestId('product-category');
-  }
-
-  get stockBadge(): Locator {
-    return this.root.getByTestId('product-stock');
-  }
-
-  get addToCartButton(): Locator {
-    return this.root.getByTestId('add-to-cart');
-  }
-
-  get detailButton(): Locator {
-    return this.root.getByTestId('product-detail');
+  constructor(private root: Locator) {
+    this.name = this.root.getByTestId('product-name');
+    this.price = this.root.getByTestId('product-price');
+    this.category = this.root.getByTestId('product-category');
+    this.stockBadge = this.root.getByTestId('product-stock');
+    this.addToCartButton = this.root.getByTestId('add-to-cart');
+    this.detailButton = this.root.getByTestId('product-detail');
   }
 
   async getName(): Promise<string> {
