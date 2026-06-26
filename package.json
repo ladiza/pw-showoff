@@ -9,6 +9,7 @@
     "test:ui": "playwright test --ui",
     "test:api": "playwright test --project=api",
     "test:e2e": "playwright test --project=ui",
+    "postinstall": "npm install --prefix apps/backend && npx playwright install chromium",
     "start:backend": "cd apps/backend && npm install && npm start",
     "start:frontend": "npx serve apps/frontend/public -l 8080",
     "report": "playwright show-report",
@@ -20,8 +21,8 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "@biomejs/biome": "2.3.11",
-    "@playwright/test": "^1.57.0",
-    "@types/node": "^25.0.9"
+    "@biomejs/biome": "2.5.1",
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^26.0.1"
   }
 }
